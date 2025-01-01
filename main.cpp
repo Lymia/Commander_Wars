@@ -51,22 +51,8 @@ int main(qint32 argc, char* argv[])
     /*************************************************************************************************/
     // show window according to window mode
     window.setPosition(Settings::getInstance()->getX(), Settings::getInstance()->getY());
-    if (Settings::getInstance()->getSmallScreenDevice())
-    {
-        // force a resolution reset
-        window.changeScreenMode(Settings::ScreenModes::FullScreen);
-    }
-    else
-    {
-        // show as normal borderless
-        window.changeScreenMode(window.getScreenMode());
-    }
-    window.setBrightness(Settings::getInstance()->getBrightness());
-    window.setGamma(Settings::getInstance()->getGamma());
-    if (window.getScreenMode() != Settings::ScreenModes::Window)
-    {
-        window.setPosition(Settings::getInstance()->getX(), Settings::getInstance()->getY());
-    }
+    window.changeScreenMode(window.getScreenMode());
+    window.show();
 #ifdef GRAPHICSUPPORT
     if (window.getNoUi())
     {

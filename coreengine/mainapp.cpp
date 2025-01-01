@@ -596,6 +596,9 @@ void Mainapp::changeScreenMode(Settings::ScreenModes mode)
     }
     // change screen size after changing the border flags
     changeScreenSize(Settings::getInstance()->getWidth(), Settings::getInstance()->getHeight());
+    // ensure brightness and gamma are correct
+    setBrightness(Settings::getInstance()->getBrightness());
+    setGamma(Settings::getInstance()->getGamma());
 #endif
 }
 
