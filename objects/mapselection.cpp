@@ -12,7 +12,7 @@
 
 MapSelection::MapSelection(qint32 heigth, qint32 width, QString folder, const QStringList & filter)
     : m_filter(filter),
-      m_currentFolder(Settings::getInstance()->getUserPath() + "maps"),
+      m_currentFolder(Settings::userPath() + "maps"),
       m_itemChangedTimer(this)
 {
 #ifdef GRAPHICSUPPORT
@@ -101,7 +101,7 @@ void MapSelection::changeFolder(QString folder)
     QString newFolder =  folder;
     if (newFolder == "")
     {
-        newFolder = Settings::getInstance()->getUserPath() + "maps";
+        newFolder = Settings::userPath() + "maps";
     }
     else if (newFolder == "..")
     {
@@ -114,7 +114,7 @@ void MapSelection::changeFolder(QString folder)
     newFolder = QDir(newFolder).absolutePath();
     newFolder = GlobalUtils::makePathRelative(newFolder);
     QStringList searchPaths;
-    searchPaths.append(Settings::getInstance()->getUserPath() + newFolder);
+    searchPaths.append(Settings::userPath() + newFolder);
     searchPaths.append(QString(oxygine::Resource::RCC_PREFIX_PATH) + newFolder);
     CONSOLE_PRINT("MapSelection::changeFolder. Relative Path: " + newFolder, GameConsole::eDEBUG);
     m_Files.clear();
