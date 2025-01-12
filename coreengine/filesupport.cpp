@@ -140,3 +140,69 @@ Filesupport::StringList Filesupport::readList(const QString & file)
     }
     return ret;
 }
+
+const char* const Filesupport::RESOURCE_NOT_FOUND = ":/file_should_not_exist";
+
+QString Filesupport::locateResource(const QString& name) {
+#ifndef USEAPPCONFIGPATH
+    // USEAPPCONFIGPATH is primarily set on Linux, where the "current directory" of programs launched from the start
+    // menu is normally the user's home directory. This is very unexpected behavior, and this should not be checked.
+    if (QFile::exists(name)) return name;
+#endif
+
+    // Check for the file in the user path.
+    QString newPath = Settings::getInstance()->getUserPath() + name;
+    if (QFile::exists(newPath)) return newPath;
+
+    // Check if we need to find resources deployed as a folder.
+#ifdef DEPLOY_RESOURCES_AS_FOLDER
+    static QString exeDir = QCoreApplication::applicationDirPath() + "/";
+    newPath = exeDir + name;
+    if (QFile::exists(newPath)) return newPath;
+
+#ifdef __linux__
+    static QString linuxExeDir = QCoreApplication::applicationDirPath() + "/../share/commander_wars/";
+    newPath = linuxExeDir + name;
+    if (QFile::exists(newPath)) return newPath;
+#endif
+#endif
+
+    // Check for the file in the built-in resources.
+    newPath = oxygine::Resource::RCC_PREFIX_PATH + name;
+    if (QFile::exists(newPath)) return newPath;
+
+    // Resource not found, return a sentinel value.
+    return RESOURCE_NOT_FOUND;
+}
+
+QStringList Filesupport::createSearchPath(const QString& name, bool firstPriority) {
+    QStringList searchFolders;
+
+    // Check for the file in the built-in resources.
+    searchFolders.append(QString(oxygine::Resource::RCC_PREFIX_PATH) + "resources/" + name);
+
+    // Check if we need to find resources deployed as a folder.
+#ifdef DEPLOY_RESOURCES_AS_FOLDER
+    static QString exeDir = QCoreApplication::applicationDirPath() + "/";
+    searchFolders.append(exeDir + "resources/" + name);
+
+#ifdef __linux__
+    static QString linuxExeDir = QCoreApplication::applicationDirPath() + "/../share/commander_wars/";
+    searchFolders.append(linuxExeDir + "resources/" + name);
+#endif
+#endif
+
+    // Check for the file in the user path.
+    searchFolders.append(Settings::getInstance()->getUserPath() + "resources/" + name);
+
+    // Add search directories from mods
+    QStringList mods = Settings::getInstance()->getMods();
+    for (const auto & mod : std::as_const(mods))
+    {
+        searchFolders.append(mod + "/" + name);
+    }
+
+    // Returns the final search path
+    if (firstPriority) std::reverse(searchFolders.begin(), searchFolders.end());
+    return std::move(searchFolders);
+}

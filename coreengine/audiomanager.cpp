@@ -133,14 +133,7 @@ void AudioManager::createSoundCache()
     {
         if (Mainapp::getInstance()->isAudioThread())
         {
-            QStringList searchFolders;
-            searchFolders.append(Settings::getInstance()->getUserPath() + "resources/sounds/");
-            searchFolders.append(QString(oxygine::Resource::RCC_PREFIX_PATH) + "resources/sounds/");
-            QStringList mods = Settings::getInstance()->getMods();
-            for (const auto & mod : std::as_const(mods))
-            {
-                searchFolders.append(mod + "/sounds/");
-            }
+            QStringList searchFolders = Filesupport::createSearchPath("sounds/");
             for (qint32 i = searchFolders.size() - 1; i >= 0; --i)
             {
                 QString folder = searchFolders[i];
@@ -165,7 +158,6 @@ void AudioManager::createSoundCache()
         else
         {
             emit sigCreateSoundCache();
-
         }
     }
 #endif
@@ -559,17 +551,7 @@ void AudioManager::SlotAddMusic(QString file, qint64 startPointMs, qint64 endPoi
 #ifdef AUDIOSUPPORT
     if (!m_noAudio)
     {
-        QString currentPath = file;
-        currentPath = file;
-        if (!QFile::exists(currentPath))
-        {
-            currentPath = Settings::getInstance()->getUserPath() + file;
-            if (!QFile::exists(currentPath))
-            {
-                CONSOLE_PRINT_MODULE("Unable to locate music file: " + currentPath + " using compiled path.", GameConsole::eDEBUG, GameConsole::eAudio);
-                currentPath = oxygine::Resource::RCC_PREFIX_PATH + file;
-            }
-        }
+        QString currentPath = Filesupport::locateResource(file);
         if (QFile::exists(currentPath))
         {
             m_player->m_player.stop();

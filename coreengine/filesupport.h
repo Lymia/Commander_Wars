@@ -132,6 +132,19 @@ public:
         }
         return map;
     }
+
+    static const char* const RESOURCE_NOT_FOUND;
+
+    /**
+     * Locates the file path for a resource, or a file path guaranteed not to exist if it is not found.
+     */
+    static QString locateResource(const QString& name);
+
+    /**
+     * Builds the search path for a particular file path.
+     * @param firstPriority Whether earlier elements in the search path take priority.
+     */
+    static QStringList createSearchPath(const QString& name, bool firstPriority = false);
 };
 
-#endif // HASHING_H
+#endif // FILESUPPORT_H

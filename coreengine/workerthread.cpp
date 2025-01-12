@@ -8,6 +8,7 @@
 
 #include "ai/aiprocesspipe.h"
 
+#include "coreengine/filesupport.h"
 #include "coreengine/mainapp.h"
 #include "coreengine/workerthread.h"
 #include "coreengine/gameconsole.h"
@@ -126,15 +127,7 @@ void WorkerThread::start()
     pConsole->init();
     UiFactory::getInstance();
     // load General-Base Scripts
-    QStringList searchPaths;
-    searchPaths.append(QString(oxygine::Resource::RCC_PREFIX_PATH) + "resources/scripts/general");
-    searchPaths.append("resources/scripts/general");
-    // make sure to overwrite existing js stuff
-    for (qint32 i = 0; i < Settings::getInstance()->getMods().size(); i++)
-    {
-        searchPaths.append(QString(oxygine::Resource::RCC_PREFIX_PATH) + Settings::getInstance()->getMods().at(i) + "/scripts/general");
-        searchPaths.append(Settings::getInstance()->getUserPath() + Settings::getInstance()->getMods().at(i) + "/scripts/general");
-    }
+    QStringList searchPaths = Filesupport::createSearchPath("scripts/general");
     for (auto & path : searchPaths)
     {
         QStringList filter;
