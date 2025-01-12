@@ -333,7 +333,7 @@ QStringList GlobalUtils::getFiles(const QString folder, const QStringList filter
 {
     QStringList ret;
 
-    QStringList paths = {oxygine::Resource::RCC_PREFIX_PATH, Settings::getInstance()->getUserPath()};
+    QStringList paths = {oxygine::Resource::RCC_PREFIX_PATH, Settings::userPath()};
     for (const auto & path : std::as_const(paths))
     {
         QDirIterator dirIter(path + folder, filter, QDir::Files, QDirIterator::Subdirectories);
@@ -468,7 +468,7 @@ QString GlobalUtils::makePathRelative(QString file, bool full)
     QString path = dir.absolutePath();
     file = file.replace(path + "/", "");
     file = file.replace(path, "");
-    QString userPath = Settings::getInstance()->getUserPath();
+    QString userPath = Settings::userPath();
     if (!userPath.isEmpty())
     {
         file = file.replace(userPath + "/", "");
@@ -484,7 +484,7 @@ QString GlobalUtils::makePathRelative(QString file, bool full)
 QFileInfoList GlobalUtils::getInfoList(const QString & folder, const QStringList & list)
 {
     QFileInfoList infoList;
-    infoList.append(QDir(Settings::getInstance()->getUserPath() + folder).entryInfoList(QDir::Dirs));
+    infoList.append(QDir(Settings::userPath() + folder).entryInfoList(QDir::Dirs));
     auto virtList = QDir(oxygine::Resource::RCC_PREFIX_PATH + folder).entryInfoList(QDir::Dirs);
     for (const auto & item : std::as_const(virtList))
     {
@@ -504,7 +504,7 @@ QFileInfoList GlobalUtils::getInfoList(const QString & folder, const QStringList
     }
     if (list.length() > 0)
     {
-        QString path = Settings::getInstance()->getUserPath() + folder;
+        QString path = Settings::userPath() + folder;
         path.replace("//", "/");
         infoList.append(QDir(path).entryInfoList(list, QDir::Files));
         path = oxygine::Resource::RCC_PREFIX_PATH + folder;

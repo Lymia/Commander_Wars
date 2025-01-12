@@ -12,7 +12,7 @@ QByteArray Filesupport::getHash(const QStringList & filter, const QStringList & 
     QCryptographicHash myHash(QCryptographicHash::Sha512);
     QStringList fullList;
 
-    QString userPath = Settings::getInstance()->getUserPath();
+    QString userPath = Settings::userPath();
     for (const auto & folder : std::as_const(folders))
     {
         fullList.append(oxygine::Resource::RCC_PREFIX_PATH + folder);
@@ -162,14 +162,14 @@ QString Filesupport::locateResource(const QString& name, bool checkMods) {
 #endif
 
     // Check for the file in the user path.
-    QString newPath = Settings::getInstance()->getUserPath() + name;
+    QString newPath = Settings::userPath() + name;
     if (QFile::exists(newPath)) return newPath;
 
     // Check for file in mods.
     QStringList mods = Settings::getInstance()->getMods();
     for (const auto & mod : std::as_const(mods))
     {
-        newPath = Settings::getInstance()->getUserPath() + mod + "/" + name;
+        newPath = Settings::userPath() + mod + "/" + name;
         if (QFile::exists(newPath)) return newPath;
 
         newPath = oxygine::Resource::RCC_PREFIX_PATH + mod + "/" + name;
@@ -221,11 +221,11 @@ QStringList Filesupport::createSearchPath(const QString& name, bool checkMods, b
     for (const auto & mod : std::as_const(mods))
     {
         searchFolders.append(oxygine::Resource::RCC_PREFIX_PATH + mod + "/" + name);
-        searchFolders.append(Settings::getInstance()->getUserPath() + mod + "/" + name);
+        searchFolders.append(Settings::userPath() + mod + "/" + name);
     }
 
     // Check for the file in the user path.
-    searchFolders.append(Settings::getInstance()->getUserPath() + resourcesPrefix + name);
+    searchFolders.append(Settings::userPath() + resourcesPrefix + name);
 
     // Returns the final search path
     if (firstPriority) std::reverse(searchFolders.begin(), searchFolders.end());
