@@ -7,6 +7,7 @@
 #include "game/gamemap.h"
 #include "game/jsData/campaignmapdata.h"
 
+#include "coreengine/filesupport.h"
 #include "coreengine/interpreter.h"
 #include "coreengine/gameconsole.h"
 #include "coreengine/settings.h"
@@ -71,19 +72,19 @@ Campaign::CampaignMapInfo Campaign::getCampaignMaps()
         files.removeAt(0);
         for (qint32 i = 0; i < files.size(); ++i)
         {
-            if (QFile::exists(Settings::getInstance()->getUserPath() + folder + files[i]))
+            QString path = Filesupport::locateResource(folder + files[i]);
+            if (QFile::exists(path))
             {
-                files[i] = Settings::getInstance()->getUserPath() + folder + files[i];
-                CONSOLE_PRINT("adding campaign map: " + Settings::getInstance()->getUserPath() + folder + files[i], GameConsole::eDEBUG);
-            }
-            else if (QFile::exists(oxygine::Resource::RCC_PREFIX_PATH + folder + files[i]))
-            {
-                CONSOLE_PRINT("adding campaign map: " + QString(oxygine::Resource::RCC_PREFIX_PATH) + folder + files[i], GameConsole::eDEBUG);
-                files[i] = oxygine::Resource::RCC_PREFIX_PATH + folder + files[i];
+                files[i] = path;
+                CONSOLE_PRINT("adding campaign map: " + path, GameConsole::eDEBUG);
             }
         }
-        addDeveloperMaps(Settings::getInstance()->getUserPath(), folder, files);
-        addDeveloperMaps(oxygine::Resource::RCC_PREFIX_PATH, folder, files);
+
+        QStringList searchPath = Filesupport::createSearchPath("", false);
+        for (qint32 i = 0; i < searchPath.size(); i++)
+        {
+            addDeveloperMaps(searchPath[i], folder, files);
+        }
     }
     return CampaignMapInfo(folder, files);
 }

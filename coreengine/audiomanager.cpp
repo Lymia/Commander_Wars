@@ -617,16 +617,8 @@ void AudioManager::SlotLoadFolder(QString folder)
 {
 #ifdef AUDIOSUPPORT
     QStringList loadedSounds;
-    for (qint32 i = 0; i < Settings::getInstance()->getMods().size(); i++)
-    {
-        loadMusicFolder(Settings::getInstance()->getUserPath() + "/" + Settings::getInstance()->getMods().at(i) + "/" + folder, loadedSounds);
-        loadMusicFolder(QString(oxygine::Resource::RCC_PREFIX_PATH) +  "/" + Settings::getInstance()->getMods().at(i) + "/" + folder, loadedSounds);
-    }
-    if (m_loadBaseGameFolders)
-    {
-        loadMusicFolder(Settings::getInstance()->getUserPath() + folder, loadedSounds);
-        loadMusicFolder(oxygine::Resource::RCC_PREFIX_PATH + folder, loadedSounds);
-    }
+    QStringList searchPath = Filesupport::createSearchPath(folder, true, true);
+    for (QString folder : searchPath) loadMusicFolder(folder, loadedSounds);
 #endif
 }
 

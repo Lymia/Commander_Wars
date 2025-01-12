@@ -143,7 +143,18 @@ Filesupport::StringList Filesupport::readList(const QString & file)
 
 const char* const Filesupport::RESOURCE_NOT_FOUND = ":/file_should_not_exist";
 
-QString Filesupport::locateResource(const QString& name) {
+static QString& getExeDir() {
+    static QString exeDir = QCoreApplication::applicationDirPath() + "/";
+    return exeDir;
+}
+static QString& getLinuxExeDir() {
+    static QString linuxExeDir = QCoreApplication::applicationDirPath() + "/../share/commander_wars/";
+    return linuxExeDir;
+}
+
+QString Filesupport::locateResource(const QString& name, bool checkMods) {
+    if (name.startsWith("/")) return locateResource(name.last(name.length() - 1));
+
 #ifndef USEAPPCONFIGPATH
     // USEAPPCONFIGPATH is primarily set on Linux, where the "current directory" of programs launched from the start
     // menu is normally the user's home directory. This is very unexpected behavior, and this should not be checked.
@@ -154,15 +165,21 @@ QString Filesupport::locateResource(const QString& name) {
     QString newPath = Settings::getInstance()->getUserPath() + name;
     if (QFile::exists(newPath)) return newPath;
 
+    // Check for file in mods.
+    QStringList mods = Settings::getInstance()->getMods();
+    for (const auto & mod : std::as_const(mods))
+    {
+        newPath = Settings::getInstance()->getUserPath() + mod + "/" + name;
+        if (QFile::exists(newPath)) return newPath;
+    }
+
     // Check if we need to find resources deployed as a folder.
 #ifdef DEPLOY_RESOURCES_AS_FOLDER
-    static QString exeDir = QCoreApplication::applicationDirPath() + "/";
-    newPath = exeDir + name;
+    newPath = getExeDir() + name;
     if (QFile::exists(newPath)) return newPath;
 
 #ifdef __linux__
-    static QString linuxExeDir = QCoreApplication::applicationDirPath() + "/../share/commander_wars/";
-    newPath = linuxExeDir + name;
+    newPath = getLinuxExeDir() + name;
     if (QFile::exists(newPath)) return newPath;
 #endif
 #endif
@@ -175,32 +192,36 @@ QString Filesupport::locateResource(const QString& name) {
     return RESOURCE_NOT_FOUND;
 }
 
-QStringList Filesupport::createSearchPath(const QString& name, bool firstPriority) {
+QStringList Filesupport::createSearchPath(const QString& name, bool checkMods, bool firstPriority) {
+    if (name.startsWith("/")) return createSearchPath(name.last(name.length() - 1));
+
     QStringList searchFolders;
 
+    // Resources prefix used for some paths
+    const char* resourcesPrefix = "resources/";
+    if (name.startsWith("resources/")) resourcesPrefix = "";
+
     // Check for the file in the built-in resources.
-    searchFolders.append(QString(oxygine::Resource::RCC_PREFIX_PATH) + "resources/" + name);
+    searchFolders.append(QString(oxygine::Resource::RCC_PREFIX_PATH) + resourcesPrefix + name);
 
     // Check if we need to find resources deployed as a folder.
 #ifdef DEPLOY_RESOURCES_AS_FOLDER
-    static QString exeDir = QCoreApplication::applicationDirPath() + "/";
-    searchFolders.append(exeDir + "resources/" + name);
+    searchFolders.append(getExeDir() + resourcesPrefix + name);
 
 #ifdef __linux__
-    static QString linuxExeDir = QCoreApplication::applicationDirPath() + "/../share/commander_wars/";
-    searchFolders.append(linuxExeDir + "resources/" + name);
+    searchFolders.append(getLinuxExeDir() + resourcesPrefix + name);
 #endif
 #endif
-
-    // Check for the file in the user path.
-    searchFolders.append(Settings::getInstance()->getUserPath() + "resources/" + name);
 
     // Add search directories from mods
     QStringList mods = Settings::getInstance()->getMods();
     for (const auto & mod : std::as_const(mods))
     {
-        searchFolders.append(mod + "/" + name);
+        searchFolders.append(Settings::getInstance()->getUserPath() + mod + "/" + name);
     }
+
+    // Check for the file in the user path.
+    searchFolders.append(Settings::getInstance()->getUserPath() + resourcesPrefix + name);
 
     // Returns the final search path
     if (firstPriority) std::reverse(searchFolders.begin(), searchFolders.end());
