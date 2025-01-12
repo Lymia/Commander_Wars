@@ -350,13 +350,10 @@ void GameAnimationDialog::loadBackground(const QString file)
     if (!file.isEmpty())
     {
         QImage img;
-        if (QFile::exists(Settings::getInstance()->getUserPath() + file))
+        QString imgPath = Filesupport::locateResource(file);
+        if (QFile::exists(imgPath))
         {
-            img = QImage(Settings::getInstance()->getUserPath() + file);
-        }
-        else if (QFile::exists(oxygine::Resource::RCC_PREFIX_PATH + file))
-        {
-            img = QImage(oxygine::Resource::RCC_PREFIX_PATH + file);
+            img = QImage(imgPath);
         }
         oxygine::spSingleResAnim pAnim = MemoryManagement::create<oxygine::SingleResAnim>();
         Mainapp::getInstance()->loadResAnim(pAnim, img, 1, 1, 1);

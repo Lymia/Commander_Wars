@@ -1,6 +1,7 @@
 #ifndef FILESUPPORT_H
 #define FILESUPPORT_H
 
+#include <QFile>
 #include <QObject>
 #include <QDataStream>
 #include <QCryptographicHash>
@@ -138,13 +139,13 @@ public:
     /**
      * Locates the file path for a resource, or a file path guaranteed not to exist if it is not found.
      */
-    static QString locateResource(const QString& name);
+    static QString locateResource(const QString& name, bool checkMods = false);
 
     /**
      * Builds the search path for a particular file path.
      * @param firstPriority Whether earlier elements in the search path take priority.
      */
-    static QStringList createSearchPath(const QString& name, bool firstPriority = false);
+    static QStringList createSearchPath(const QString& name, bool checkMods = true, bool firstPriority = false);
 };
 
 #endif // FILESUPPORT_H

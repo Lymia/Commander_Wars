@@ -9,6 +9,7 @@
 #include "resource_management/gameanimationmanager.h"
 #include "resource_management/fontmanager.h"
 
+#include "coreengine/filesupport.h"
 #include "coreengine/gameconsole.h"
 #include "coreengine/interpreter.h"
 #include "coreengine/settings.h"
@@ -251,17 +252,10 @@ void GameAnimation::addSprite3(QString spriteID, float offsetX, float offsetY, Q
     else
     {
         QImage img;
-        if (QFile::exists(spriteID))
+        QString imgPath = Filesupport::locateResource(spriteID);
+        if (QFile::exists(imgPath))
         {
-            img = QImage(spriteID);
-        }
-        else if (QFile::exists(Settings::getInstance()->getUserPath() + spriteID))
-        {
-            img = QImage(Settings::getInstance()->getUserPath() + spriteID);
-        }
-        else if (QFile::exists(oxygine::Resource::RCC_PREFIX_PATH + spriteID))
-        {
-            img = QImage(oxygine::Resource::RCC_PREFIX_PATH + spriteID);
+            img = QImage(imgPath);
         }
         else
         {
