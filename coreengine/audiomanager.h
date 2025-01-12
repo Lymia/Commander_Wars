@@ -54,8 +54,6 @@ private:
         QMediaPlayer m_player;
         qint32 m_currentMedia{-1};
         qint32 m_nextMedia{-1};
-        QByteArray m_content;
-        QBuffer m_fileStream;
         QString m_currentMediaFile;
     };
     using spPlayer = std::shared_ptr<Player>;
