@@ -239,6 +239,14 @@ jobs:
       working-directory: '${{github.workspace}}/build'
       run: cmake --build '${{github.workspace}}/build' --target all -j4
 
+    - name: Setup (Sign APK)
+      if: matrix.target == 'android' && github.repository == 'Robosturm/Commander_Wars'
+      run: echo "SIGN_FLAG=--sign" >> $GITHUB_ENV
+
+    - name: Setup (Do not sign APK)
+      if: matrix.target == 'android' && github.repository != 'Robosturm/Commander_Wars'
+      run: echo "SIGN_FLAG=" >> $GITHUB_ENV
+
     - name: Bundle APK
       if: matrix.target == 'android'
       env:
@@ -254,7 +262,12 @@ jobs:
         --android-platform android-34 \
         --gradle \
         --release \
-        --sign
+        $SIGN_FLAG
+
+    - name: Minor hack for Android APK
+      if: matrix.target == 'android' && github.repository != 'Robosturm/Commander_Wars'
+      run: mv android-build/build/outputs/apk/release/android-build-release-unsigned.apk \
+              android-build/build/outputs/apk/release/android-build-release-signed.apk
 
     - name: Build linux
       if: matrix.linuxFlag == 'linux'
