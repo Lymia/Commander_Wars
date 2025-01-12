@@ -221,7 +221,6 @@ void AudioManager::createPlayer()
         CONSOLE_PRINT_MODULE("AudioThread::createPlayer()", GameConsole::eDEBUG, GameConsole::eAudio);
         m_player = MemoryManagement::create<Player>(this);
         m_player->m_player.setAudioOutput(&m_audioOutput);
-        m_player->m_fileStream.setBuffer(&m_player->m_content);
         connect(&m_player->m_player, &QMediaPlayer::mediaStatusChanged, this, &AudioManager::mediaStatusChanged, Qt::QueuedConnection);
         connect(&m_player->m_player, &QMediaPlayer::playbackStateChanged, this, &AudioManager::mediaPlaybackStateChanged, Qt::QueuedConnection);
         connect(&m_player->m_player, &QMediaPlayer::errorOccurred, this, &AudioManager::reportReplayError, Qt::QueuedConnection);
@@ -358,7 +357,6 @@ void AudioManager::SlotClearPlayList()
         m_player->m_currentMedia = -1;
         m_player->m_nextMedia = -1;
         m_player->m_player.stop();
-        m_player->m_fileStream.close();
         CONSOLE_PRINT_MODULE("AudioThread::SlotClearPlayList() playlist cleared", GameConsole::eDEBUG, GameConsole::eAudio);
     }
 #endif
@@ -442,13 +440,8 @@ void AudioManager::loadMediaForFile(QString filePath, qint32 position)
     if (!m_noAudio)
     {
         m_player->m_player.setPosition(0);
-        m_player->m_fileStream.close();
-        QFile file(filePath);
         m_player->m_currentMediaFile = filePath;
-        file.open(QIODevice::ReadOnly);
-        m_player->m_content = file.readAll();
-        m_player->m_fileStream.open(QIODevice::ReadOnly);
-        m_player->m_player.setSourceDevice(&(m_player->m_fileStream));
+        m_player->m_player.setSource(GlobalUtils::getUrlForFile(filePath));
         m_player->m_player.setPosition(position);
     }
 #endif
@@ -577,7 +570,14 @@ void AudioManager::SlotAddMusic(QString file, qint64 startPointMs, qint64 endPoi
         }
         else
         {
-            CONSOLE_PRINT("Unable to locate music file: " + currentPath, GameConsole::eERROR);
+            CONSOLE_PRINT("Unable to locate music file: " + file, GameConsole::eERROR);
+
+            // Try using OGG instead of mp3/wav if it is available.
+            if (file.endsWith(".wav") || file.endsWith(".mp3"))
+            {
+                // recursion is safe because the file always ends in .ogg and will not trigger this path again
+                SlotAddMusic(file.first(file.length() - 4) + ".ogg", startPointMs, endPointMs);
+            }
         }
     }
     #endif
@@ -656,7 +656,8 @@ void AudioManager::loadMusicFolder(const QString & folder, QStringList& loadedSo
         QDir directory(folder);
         if (directory.exists())
         {
-            QStringList filter("*.mp3");
+            QStringList filter;
+            filter << "*.mp3" << "*.ogg" << "*.wav";
             QStringList files = directory.entryList(filter);
             for (const auto& file : files)
             {
