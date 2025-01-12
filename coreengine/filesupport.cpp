@@ -171,6 +171,9 @@ QString Filesupport::locateResource(const QString& name, bool checkMods) {
     {
         newPath = Settings::getInstance()->getUserPath() + mod + "/" + name;
         if (QFile::exists(newPath)) return newPath;
+
+        newPath = oxygine::Resource::RCC_PREFIX_PATH + mod + "/" + name;
+        if (QFile::exists(newPath)) return newPath;
     }
 
     // Check if we need to find resources deployed as a folder.
@@ -217,6 +220,7 @@ QStringList Filesupport::createSearchPath(const QString& name, bool checkMods, b
     QStringList mods = Settings::getInstance()->getMods();
     for (const auto & mod : std::as_const(mods))
     {
+        searchFolders.append(oxygine::Resource::RCC_PREFIX_PATH + mod + "/" + name);
         searchFolders.append(Settings::getInstance()->getUserPath() + mod + "/" + name);
     }
 
