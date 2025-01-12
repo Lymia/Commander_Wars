@@ -130,7 +130,6 @@ GameEnums::VisionType Player::getDefaultClearVisionType(GameEnums::Fog mode) con
     case GameEnums::Fog::Fog_OfWar:
     {
         return GameEnums::VisionType_Fogged;
-        break;
     }
     case GameEnums::Fog::Fog_OfShroud:
     {
@@ -1192,7 +1191,7 @@ const QImage &Player::getColorTable() const
 }
 #endif
 
-void Player::updatePlayerVision(bool reduceTimer)
+void Player::updatePlayerVision(bool reduceTimer, bool forceVisionReset)
 {
     // only update visual stuff if needed
     qint32 width = m_pMap->getMapWidth();
@@ -1207,16 +1206,18 @@ void Player::updatePlayerVision(bool reduceTimer)
     {
         for (qint32 y = 0; y < heigth; y++)
         {
-            bool requiresReset = false;
             if (reduceTimer && m_FogVisionFields[x][y].m_duration > 0)
             {
-                requiresReset = true;
                 m_FogVisionFields[x][y].m_duration -= 1;
             }
             qint32 duration = m_FogVisionFields[x][y].m_duration;
-            if (duration <= 0 && requiresReset)
+            if (duration <= 0 || forceVisionReset)
             {
-                m_FogVisionFields[x][y].m_visionType = getDefaultClearVisionType(m_pMap->getGameRules()->getFogMode());
+                if (m_FogVisionFields[x][y].m_visionType != GameEnums::VisionType::VisionType_Shrouded)
+                {
+                    auto fog = getDefaultClearVisionType(m_pMap->getGameRules()->getFogMode());
+                    m_FogVisionFields[x][y].m_visionType = fog;
+                }
                 m_FogVisionFields[x][y].m_duration = 0;
                 m_FogVisionFields[x][y].m_directView = false;
             }
@@ -1943,7 +1944,7 @@ QPoint Player::getRockettarget(qint32 radius, qint32 damage, qreal ownUnitValue,
         }
     }
 
-    if (targets.size() >= 0)
+    if (targets.size() > 0)
     {
         return targets[GlobalUtils::randInt(0, targets.size() - 1)];
     }
@@ -1998,7 +1999,7 @@ QPoint Player::getSiloRockettarget(qint32 radius, qint32 damage, qint32 & highes
             }
         }
     }
-    if (targets.size() >= 0)
+    if (targets.size() > 0)
     {
         return targets[GlobalUtils::randInt(0, targets.size() - 1)];
     }
