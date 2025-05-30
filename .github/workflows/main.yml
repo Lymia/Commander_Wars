@@ -86,7 +86,7 @@ jobs:
             source_asset: 'Commander_Wars-x86_64.AppImage'
             asset_file: 'Commander_Wars-Linux_x64'
             asset_name: 'Commander_Wars-Linux_no_userpath_x64-${{github.ref_name}}.AppImage'
-            cmakeOptions: ' -DOPENSSL_USE_STATIC_LIBS=FALSE -DUSEAPPCONFIGPATH:BOOL=ON'
+            cmakeOptions: ' -DOPENSSL_USE_STATIC_LIBS=FALSE'
             serverFlag: ''
             linuxFlag: 'linux'
           - buildTarget: ubuntu-server
