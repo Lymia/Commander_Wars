@@ -203,7 +203,7 @@ bool Multiplayermenu::doDespawnSlave(const QString & savegame)
     {
         m_despawning = true;
         QString command = NetworkCommands::SLAVEINFODESPAWNING;
-        QString saveFile = "savegames/" +  savegame + ".lsav";
+        QString saveFile = Settings::getInstance()->getUserPath() + "savegames/" +  savegame + ".lsav";
         auto doc = doSaveLobbyState(saveFile, command);
         CONSOLE_PRINT("Sending command " + command, GameConsole::eDEBUG);
         spNetworkInterface pSlaveMasterConnection = Mainapp::getInstance()->getSlaveClient();
