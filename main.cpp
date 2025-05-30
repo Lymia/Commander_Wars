@@ -31,7 +31,11 @@ int main(qint32 argc, char* argv[])
     QCoreApplication app(argc, argv);
 #endif
     GlobalUtils::setup();
+#ifdef GRAPHICSUPPORT
     app.setApplicationName("Commander Wars");
+#else
+    app.setApplicationName("Commander Wars Dedicated Server");
+#endif
     app.setApplicationVersion(GameVersion().toString());
     QThread::currentThread()->setPriority(QThread::Priority::HighestPriority);
     Mainapp window;
