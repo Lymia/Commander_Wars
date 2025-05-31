@@ -73,8 +73,6 @@ void NetworkInterface::attachKeys(QSslConfiguration &sslConfiguration)
                     QSslCertificate cert(keyBytes);
                     if (!cert.isNull())
                     {
-                        auto effectData = cert.effectiveDate();
-                        auto expires = cert.expiryDate();
                         sslConfiguration.setLocalCertificate(cert);
                     }
                     else

@@ -164,8 +164,3 @@ void TCPClient::sslErrors(const QList<QSslError> &errors)
         CONSOLE_PRINT(error.errorString(), GameConsole::eLogLevels::eDEBUG);
     }
 }
-
-void TCPClient::displayDetailedError()
-{
-    CONSOLE_PRINT("Socket error: " + m_pSocket->errorString(), GameConsole::eDEBUG);
-}

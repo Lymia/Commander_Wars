@@ -39,8 +39,7 @@ protected slots:
     void connected();
 private slots:
     void sslErrors(const QList<QSslError> &errors);
-protected:
-    void displayDetailedError() override;
+
 private:
     spRxTask m_pRXTask;
     spTxTask m_pTXTask;

@@ -1683,7 +1683,7 @@ void PlayerSelection::requestPlayer(quint64 socketID, QDataStream &stream)
         if (!rejoin)
         {
             bool alreadyInGame = false;
-            if (!serverRequest && player < 0)
+            if (!serverRequest)
             {
                 for (qint32 i = 0; i < m_pMap->getPlayerCount(); ++i)
                 {
