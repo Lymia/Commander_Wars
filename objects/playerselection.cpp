@@ -484,26 +484,24 @@ void PlayerSelection::updateInitialState(bool relaunchedLobby)
     QStringList defaultAiList = getDefaultAiNames();
     if (m_saveGame && m_pNetworkInterface.get() != nullptr && !Mainapp::getSlave())
     {
-        if (getIsServerNetworkInterface())
+        for (qint32 i = 0; i < m_pMap->getPlayerCount(); i++)
         {
-            for (qint32 i = 0; i < m_pMap->getPlayerCount(); i++)
+            Player *pPlayer = m_pMap->getPlayer(i);
+            DropDownmenu *pPlayerAi = getCastedObject<DropDownmenu>(OBJECT_AI_PREFIX + QString::number(i));
+            qint32 ai = pPlayer->getControlType();
+            if ((ai == GameEnums::AiTypes_Human &&
+                 Settings::getInstance()->getUsername() != pPlayer->getPlayerNameId()) ||
+                ai == GameEnums::AiTypes_Open)
             {
-                Player *pPlayer = m_pMap->getPlayer(i);
-                DropDownmenu *pPlayerAi = getCastedObject<DropDownmenu>(OBJECT_AI_PREFIX + QString::number(i));
-                qint32 ai = pPlayer->getControlType();
-                if ((ai == GameEnums::AiTypes_Human &&
-                     Settings::getInstance()->getUsername() != pPlayer->getPlayerNameId()) ||
-                    ai == GameEnums::AiTypes_Open)
+                if (pPlayerAi != nullptr)
                 {
-                    if (pPlayerAi != nullptr)
-                    {
-                        selectPlayerAi(i, GameEnums::AiTypes_Open);
-                    }
+                    pPlayerAi->setCurrentItem(aiList.size() - 1);
+                    createInitialAi(pPlayerAi, GameEnums::AiTypes_Open, i);
                 }
-                else
-                {
-                    selectPlayerAi(i, static_cast<GameEnums::AiTypes>(ai));
-                }
+            }
+            else
+            {
+                createInitialAi(pPlayerAi, ai, i);
             }
         }
     }
@@ -640,7 +638,7 @@ void PlayerSelection::createInitialAi(DropDownmenu *pPlayerAi, qint32 ai, qint32
     Player *pPlayer = m_pMap->getPlayer(player);
     // create initial selected ai's
     QString displayName = pPlayer->getPlayerNameId();
-    if (pPlayerAi != nullptr && ai != GameEnums::AiTypes_Human)
+    if (pPlayerAi != nullptr)
     {
         displayName = pPlayerAi->getCurrentItemText();
         pPlayer->setPlayerNameId(displayName);
@@ -1664,8 +1662,7 @@ void PlayerSelection::requestPlayer(quint64 socketID, QDataStream &stream)
                 auto *pPlayer = m_pMap->getPlayer(i);
                 if (pPlayer->getPlayerNameId() == username &&
                     pPlayer->getSocketId() == 0 &&
-                    (pPlayer->getControlType() == GameEnums::AiTypes::AiTypes_Human ||
-                     pPlayer->getControlType() == GameEnums::AiTypes::AiTypes_Open))
+                    pPlayer->getControlType() == GameEnums::AiTypes::AiTypes_Human)
                 {
                     CONSOLE_PRINT("Player " + QString::number(i) + " username " + username + " rejoined lobby game.", GameConsole::eDEBUG);
                     remoteChangePlayerOwner(socketID, username, i, eAiType);
@@ -2292,9 +2289,7 @@ void PlayerSelection::updatePlayerData(qint32 player)
             else
             {
                 if (m_pNetworkInterface->getIsServer() || m_isServerGame ||
-                    isOpenPlayer(player) ||
-                    (pPlayer->getBaseGameInput() != nullptr &&
-                     pPlayer->getBaseGameInput()->getAiType() == GameEnums::AiTypes_Human))
+                    isOpenPlayer(player))
                 {
                     if (pDropDownmenuAI != nullptr)
                     {
@@ -2378,16 +2373,7 @@ void PlayerSelection::updatePlayerData(qint32 player)
             {
                 if (pDropDownmenuAI != nullptr)
                 {
-                    if (m_pNetworkInterface->getIsServer() || m_isServerGame ||
-                        (pPlayer->getBaseGameInput() != nullptr &&
-                         pPlayer->getBaseGameInput()->getAiType() == GameEnums::AiTypes_Human))
-                    {
-                        pDropDownmenuAI->setEnabled(true);
-                    }
-                    else
-                    {
-                        pDropDownmenuAI->setEnabled(false);
-                    }
+                    pDropDownmenuAI->setEnabled(false);
                 }
                 if (pDropDownmenuColor != nullptr)
                 {
