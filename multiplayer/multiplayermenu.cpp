@@ -1571,6 +1571,7 @@ void Multiplayermenu::slotHostGameLaunched()
         m_pNetworkInterface->setIsServer(true);
         createChat();
         MapSelectionMapsMenue::buttonNext();
+        m_pPlayerSelection->sendPlayerRequest(socketID, -1, GameEnums::AiTypes_Human);
     }
 }
 
